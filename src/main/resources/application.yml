@@ -1,0 +1,373 @@
+# ==========================================
+# STRADE AUTH SERVICE - APPLICATION CONFIGURATION
+# ==========================================
+
+# ==========================================
+# APPLICATION METADATA
+# ==========================================s
+app:
+  name: STRADE Auth Service
+  version: 1.0.0
+
+  password:
+    ledger-hash-password: ${LEDGER_HASH_PASSWORD:false} # simple, true, false
+    frontend-decrypt-mode: ${FRONTEND_DECRYPT_MODE:WEB}
+    hash-strategy: ${PASSWORD_HASH_STRATEGY:AUTO}
+    hash-endpoint-url: ${PASSWORD_HASH_ENDPOINT_URL:https://s-trade.co.id/Home/SHash}
+
+    frontend-encryption:
+      enabled: false
+      key: ${FRONTEND_ENCRYPTION_KEY:}
+      iv: ${FRONTEND_ENCRYPTION_IV:}
+
+  # ==========================================
+  # JWT CONFIGURATION
+  # ==========================================
+  jwt:
+    issuer: idx-terminal
+    private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:keys/private_key.pem}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:keys/public_key.pem}
+    access-token:
+      expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:1}
+    refresh-token:
+      #expiration-days: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:3}
+      expiration-minutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:3}
+
+  # ==========================================
+  # MAIL CONFIGURATION
+  # ==========================================
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:s74099871@gmail.com}
+    password: ${MAIL_PASSWORD:wzlmxnxuxmzcazrg}
+    default-encoding: UTF-8
+    test-connection: false
+
+    from: ${MAIL_FROM:csindonesia@uobkayhian.com}
+    from-name: ${MAIL_FROM_NAME:IDX TERMINAL}
+    enabled: ${MAIL_ENABLED:true}
+
+    smtp:
+      auth: true
+      starttls-enable: true
+      starttls-required: true
+      connection-timeout: 5000
+      timeout: 5000
+      write-timeout: 5000
+    totp:
+      delivery-mode: LINK
+      setup-base-url: http://172.24.25.33:8090/totp-setup
+      token-expiry-minutes: 60
+
+    branding:
+      company:
+        name: "UOB Kay Hian Securities"
+        short-name: "UOB Kay Hian"
+        description: "Member of Indonesia Stock Exchange"
+
+      application:
+        name: "UTRADE"
+        tagline: "Trade Anywhere"
+        url: "https://utrade.co.id"
+
+      contact:
+        hotline: "+62 21 29933999"
+        email: "csindonesia@uobkayhian.com"
+        hours: "Mon-Fri 08:00-17:00 WIB"
+        support-url: "https://support.utrade.co.id"
+
+      theme:
+        # Crimson Red theme (UOB Kay Hian brand)
+        primary-color: "#DC143C"
+        secondary-color: "#8B0000"
+        success-color: "#28a745"
+        warning-color: "#ffc107"
+        danger-color: "#dc3545"
+        info-color: "#17a2b8"
+        primary-text-color: "#FFFFFF"
+        # Optional: Override gradient colors
+        gradient-start: "#5A0E24"
+        gradient-end: "#D14747"
+
+      footer:
+        copyright-year: 2025
+        copyright-text: "© {year} {company}. All rights reserved."
+        show-do-not-reply: true
+        do-not-reply-text: "This is an automated message, please do not reply to this email."
+        additional-text:
+
+  # ==========================================
+  # SECURITY CONFIGURATION
+  # ==========================================
+  security:
+    max-login-retry: ${SECURITY_MAX_LOGIN_RETRY:3}
+    encryption-key: ${ENCRYPTION_KEY:nzWE/C1aTm/wIDAJfud40BPfj1gpHobDgCaLr8odEP0=}
+    min-login-hour: 1
+    min-login-minute: 0
+
+    # MFA Configuration
+    mfa:
+      enforced: ${MFA_ENFORCED:false}
+      available-methods:
+        - OTP_EMAIL
+      totp-setup-requires-auth: false
+
+      # OTP Settings
+      otp:
+        length: ${MFA_OTP_LENGTH:6}
+        ttl-seconds: ${MFA_OTP_TTL_SECONDS:180}
+        max-attempts: ${MFA_OTP_MAX_ATTEMPTS:3}
+
+      # TOTP Settings
+      totp:
+        issuer: ${MFA_TOTP_ISSUER:UTRADE}
+        digits: ${MFA_TOTP_DIGITS:6}
+        period-seconds: ${MFA_TOTP_PERIOD_SECONDS:30}
+        algorithm: ${MFA_TOTP_ALGORITHM:SHA1}
+        window: ${MFA_TOTP_WINDOW:1}
+        email-notification:
+          enabled: true
+          send-secret: true
+          send-qr-uri: true
+          send-backup-codes: false
+
+      # Trusted Device Settings
+      trusted-device:
+        ttl-days: ${MFA_TRUSTED_DEVICE_TTL_DAYS:90}
+        max-devices: ${MFA_TRUSTED_DEVICE_MAX_DEVICES:3}
+        send-email-notification: ${MFA_TRUSTED_DEVICE_SEND_EMAIL:true}
+
+      # Backup Codes
+      backup-codes:
+        count: ${MFA_BACKUP_CODES_COUNT:5}
+
+    # Rate Limiting
+    rate-limit:
+      login:
+        max-attempts: ${RATE_LIMIT_LOGIN_MAX_ATTEMPTS:5}
+        window-seconds: ${RATE_LIMIT_LOGIN_WINDOW_SECONDS:300}
+      otp:
+        max-requests: ${RATE_LIMIT_OTP_MAX_REQUESTS:3}
+        window-seconds: ${RATE_LIMIT_OTP_WINDOW_SECONDS:300}
+      totp:
+        max-attempts: ${RATE_LIMIT_TOTP_MAX_ATTEMPTS:5}
+        window-seconds: ${RATE_LIMIT_TOTP_WINDOW_SECONDS:300}
+
+  # ==========================================
+  # SESSION CONFIGURATION
+  # ==========================================
+  session:
+    inactive-threshold-minutes: ${SESSION_INACTIVE_THRESHOLD_MINUTES:30}
+
+  # ==========================================
+  # SCHEDULER CONFIGURATION
+  # ==========================================
+  scheduler:
+    enabled: ${SCHEDULER_ENABLED:true}
+
+    # Token Cleanup Jobs
+    token-cleanup:
+      enabled: ${SCHEDULER_TOKEN_CLEANUP_ENABLED:true}
+      expired-denylist: ${SCHEDULER_TOKEN_CLEANUP_EXPIRED_DENYLIST:true}
+      revoked-refresh-tokens: ${SCHEDULER_TOKEN_CLEANUP_REVOKED_REFRESH_TOKENS:true}
+      expired-otp-challenges: ${SCHEDULER_TOKEN_CLEANUP_EXPIRED_OTP_CHALLENGES:false}
+      old-otp-challenges: ${SCHEDULER_TOKEN_CLEANUP_OLD_OTP_CHALLENGES:false}
+      comprehensive-cleanup: ${SCHEDULER_TOKEN_CLEANUP_COMPREHENSIVE_CLEANUP:false}
+
+    # Session Cleanup Jobs
+    session-cleanup:
+      enabled: ${SCHEDULER_SESSION_CLEANUP_ENABLED:true}
+      mark-inactive: ${SCHEDULER_SESSION_CLEANUP_MARK_INACTIVE:true}
+      cleanup-expired: ${SCHEDULER_SESSION_CLEANUP_CLEANUP_EXPIRED:true}
+
+    # Security Monitor Jobs
+    security-monitor:
+      enabled: ${SCHEDULER_SECURITY_MONITOR_ENABLED:true}
+      monitor: ${SCHEDULER_SECURITY_MONITOR_MONITOR:false}
+      login-failures: ${SCHEDULER_SECURITY_MONITOR_LOGIN_FAILURES:false}
+      token-reuse: ${SCHEDULER_SECURITY_MONITOR_TOKEN_REUSE:false}
+
+    # Notification Processor Jobs
+    notification-processor:
+      enabled: ${SCHEDULER_NOTIFICATION_PROCESSOR_ENABLED:false}
+      process-pending: ${SCHEDULER_NOTIFICATION_PROCESSOR_PROCESS_PENDING:false}
+      cleanup-old: ${SCHEDULER_NOTIFICATION_PROCESSOR_CLEANUP_OLD:false}
+
+    # Health Check Jobs
+    health-check:
+      enabled: ${SCHEDULER_HEALTH_CHECK_ENABLED:true}
+      database: ${SCHEDULER_HEALTH_CHECK_DATABASE:true}
+      redis: ${SCHEDULER_HEALTH_CHECK_REDIS:true}
+
+# ==========================================
+# WhatsApp Configuration
+# ==========================================
+whatsapp:
+  provider: ${WHATSAPP_PROVIDER:mekari}
+
+  # Mekari Qontak Configuration
+  mekari:
+    client-id: NULL
+    client-secret: NULL
+    base-url: NULL
+    whatsapp:
+      template-id: NULL
+      channel-integration-id: NULL
+
+  # IDX WhatsApp Configuration
+  idx:
+    bearer-token: NULL
+    base-url: NULL
+    template:
+      otp-template-id: NULL
+      language-code: NULL
+      otp-category: NULL
+
+# ==========================================
+# SPRING BOOT CONFIGURATION
+# ==========================================
+spring:
+  application:
+    name: strade-auth-service
+
+  # ==========================================
+  # DATABASE CONFIGURATION
+  # ==========================================
+  datasource:
+    #url: jdbc:sqlserver://${DB_HOST:10.192.98.21}:${DB_PORT:6969};databaseName=${DB_NAME:S21_RT_Plus};encrypt=true;trustServerCertificate=true
+    url: jdbc:sqlserver://${DB_HOST:172.24.25.17}:${DB_PORT:1433};databaseName=${DB_NAME:S21_RT_PLUS_STRADE};encrypt=true;trustServerCertificate=true
+    username: ${DB_USERNAME:s21rt}
+    password: ${DB_PASSWORD:diehards21rt}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      auto-commit: true
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${DB_POOL_CONNECTION_TIMEOUT:30000}
+      idle-timeout: ${DB_POOL_IDLE_TIMEOUT:600000}
+      max-lifetime: ${DB_POOL_MAX_LIFETIME:1800000}
+
+  # ==========================================
+  # JPA/HIBERNATE CONFIGURATION
+  # ==========================================
+  jpa:
+    #database-platform: org.hibernate.dialect.SQLServerDialect
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          #time_zone: UTC
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+
+  # ==========================================
+  # REDIS CONFIGURATION
+  # ==========================================
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:StrongMpcRedisP@ssw0rd123}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:20}
+          max-idle: ${REDIS_POOL_MAX_IDLE:10}
+          min-idle: ${REDIS_POOL_MIN_IDLE:5}
+          max-wait: ${REDIS_POOL_MAX_WAIT:2000ms}
+
+  # ==========================================
+  # CACHE CONFIGURATION
+  # ==========================================
+  cache:
+    type: redis
+    redis:
+      time-to-live: ${CACHE_TTL_MILLISECONDS:1800000}
+      cache-null-values: false
+
+  # ==========================================
+  # ASYNC & SCHEDULING CONFIGURATION
+  # ==========================================
+  task:
+    # Async Execution
+    execution:
+      pool:
+        core-size: ${ASYNC_POOL_CORE_SIZE:5}
+        max-size: ${ASYNC_POOL_MAX_SIZE:10}
+        queue-capacity: ${ASYNC_POOL_QUEUE_CAPACITY:100}
+      thread-name-prefix: auth-async-
+
+    # Task Scheduling
+    scheduling:
+      pool:
+        size: ${SCHEDULER_POOL_SIZE:5}
+      thread-name-prefix: auth-scheduler-
+
+  # ==========================================
+  # AUTOCONFIGURE EXCLUSIONS
+  # ==========================================
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+# ==========================================
+# SERVER CONFIGURATION
+# ==========================================
+server:
+  port: ${SERVER_PORT:8098}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# ==========================================
+# LOGGING CONFIGURATION
+# ==========================================
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:WARN}
+    com.strade.auth: ${LOG_LEVEL_APP:WARN}
+    org.springframework.web: ${LOG_LEVEL_SPRING_WEB:WARN}
+    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:DEBUG}
+    org.hibernate.SQL: ${LOG_LEVEL_HIBERNATE_SQL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_HIBERNATE_BINDER:WARN}
+    com.microsoft.sqlserver.jdbc: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n%xEx{10}"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n%xEx{10}"
+  file:
+    name: ${LOG_FILE_PATH:logs/auth-service.log}
+    logback:
+      rollingpolicy:
+        max-file-size: ${LOG_FILE_MAX_SIZE:10MB}
+        max-history: ${LOG_FILE_MAX_HISTORY:30}
+        total-size-cap: ${LOG_FILE_TOTAL_SIZE_CAP:2GB}
+
+# ==========================================
+# ACTUATOR & MONITORING
+# ==========================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS:health,info,metrics,prometheus}
+  endpoint:
+    health:
+      show-details: ${ACTUATOR_HEALTH_SHOW_DETAILS:when-authorized}
+  metrics:
+    export:
+      prometheus:
+        enabled: ${PROMETHEUS_ENABLED:true}

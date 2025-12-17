@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOTP Setup - UTRADE</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        max-width: 650px;
+        width: 100%;
+        padding: 40px;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 35px;
+        padding-bottom: 25px;
+        border-bottom: 3px solid #f0f0f0;
+    }
+
+    .logo-container {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        width: 300px;
+        height: 90px;
+        margin: 0 auto 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .logo-container span {
+        color: white;
+        font-size: 52px;
+        font-weight: bold;
+    }
+
+    .header h1 {
+        color: #dc3545;
+        font-size: 30px;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .header p {
+        color: #666;
+        font-size: 15px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #dc3545;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        border: 2px solid #dc3545;
+        border-radius: 10px;
+        padding: 25px;
+        color: #c33;
+        text-align: center;
+    }
+
+    .error h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+        color: #dc3545;
+    }
+
+    .error p {
+        margin-bottom: 0;
+        color: #666;
+    }
+
+    .section {
+        margin-bottom: 30px;
+        padding: 22px;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+        border-radius: 10px;
+        border: 1px solid #f0e0e0;
+    }
+
+    .section h2 {
+        color: #dc3545;
+        font-size: 20px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .qr-code {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        margin: 15px 0;
+        border: 2px dashed #dc3545;
+    }
+
+    .qr-code img {
+        max-width: 250px;
+        height: auto;
+        border: 3px solid #dc3545;
+        border-radius: 10px;
+        padding: 10px;
+        background: white;
+    }
+
+    .secret-key {
+        background: white;
+        padding: 18px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 15px 0;
+        border: 2px solid #ffc107;
+    }
+
+    .secret-key code {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        color: #dc3545;
+        letter-spacing: 3px;
+        font-weight: bold;
+        word-break: break-all;
+        display: block;
+        padding: 12px;
+    }
+
+    .backup-codes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 15px 0;
+    }
+
+    .backup-code {
+        background: white;
+        padding: 14px;
+        text-align: center;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        color: #dc3545;
+        border: 2px solid #ffe0e0;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .backup-code:hover {
+        background: #fff5f5;
+        border-color: #dc3545;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+    }
+
+    .warning {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px;
+        color: #856404;
+        margin: 20px 0;
+    }
+
+    .warning strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .warning ul {
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+
+    .warning li {
+        margin-bottom: 5px;
+    }
+
+    .button {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 15px 35px;
+        border: none;
+        border-radius: 10px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 25px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .instructions {
+        background: linear-gradient(135deg, #e7f3ff 0%, #cfe7ff 100%);
+        border-left: 4px solid #2196F3;
+        padding: 18px;
+        border-radius: 6px;
+        margin: 20px 0;
+    }
+
+    .instructions strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #1976D2;
+        font-size: 16px;
+    }
+
+    .instructions ol {
+        margin-left: 20px;
+        color: #1976D2;
+    }
+
+    .instructions li {
+        margin-bottom: 10px;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .footer p {
+        color: #999;
+        font-size: 12px;
+        margin: 5px 0;
+    }
+
+    .footer .brand {
+        color: #666;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 25px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+        }
+
+        .backup-codes {
+            grid-template-columns: 1fr;
+        }
+
+        .secret-key code {
+            font-size: 14px;
+        }
+
+        .logo-container {
+            width: 450px;
+            height: 75px;
+        }
+
+        .logo-container span {
+            font-size: 42px;
+        }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo-container">
+      <span>UTRADE</span>
+    </div>
+    <h1>🔐 TOTP Authentication Setup</h1>
+    <p>Complete your two-factor authentication setup</p>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loadingState" class="loading">
+    <div class="spinner"></div>
+    <p style="color: #666; font-size: 15px;">Loading your setup information...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorState" class="error" style="display: none;">
+    <h2>❌ Error</h2>
+    <p id="errorMessage"></p>
+  </div>
+
+  <!-- Success State -->
+  <div id="successState" style="display: none;">
+    <div class="instructions">
+      <strong>📱 Setup Instructions:</strong>
+      <ol>
+        <li>Download an authenticator app (Google Authenticator, Authy, Microsoft Authenticator)</li>
+        <li>Open the app and scan the QR code below</li>
+        <li>Or manually enter the secret key if QR scanning doesn't work</li>
+        <li>Save your backup codes in a secure location</li>
+      </ol>
+    </div>
+
+    <!-- QR Code Section -->
+    <div class="section">
+      <h2><span>📷</span> QR Code</h2>
+      <p style="margin-bottom: 10px; color: #666;">Scan this with your authenticator app:</p>
+      <div class="qr-code">
+        <img id="qrCodeImage" src="" alt="TOTP QR Code">
+      </div>
+    </div>
+
+    <!-- Secret Key Section -->
+    <div class="section">
+      <h2><span>🔑</span> Manual Setup Key</h2>
+      <p style="margin-bottom: 10px; color: #666;">If you can't scan the QR code, enter this key manually:</p>
+      <div class="secret-key">
+        <code id="secretKey"></code>
+      </div>
+      <div class="warning">
+        <strong>⚠️ Important:</strong>
+        Keep this secret key safe and never share it with anyone!
+      </div>
+    </div>
+
+    <!-- Backup Codes Section -->
+    <div class="section">
+      <h2><span>💾</span> Backup Codes</h2>
+      <p style="margin-bottom: 15px; color: #666;">Save these backup codes in a secure place. Each code can be used <strong>once</strong>:</p>
+      <div id="backupCodes" class="backup-codes"></div>
+      <div class="warning">
+        <strong>⚠️ Critical:</strong>
+        <ul>
+          <li>Store these codes securely - they won't be shown again!</li>
+          <li>Each code can only be used once if you lose access to your authenticator app</li>
+          <li>Recommended: Save in a password manager</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="button" onclick="window.close()">
+      ✓ I've Saved Everything
+    </button>
+
+    <div class="footer">
+      <p class="brand">UOB Kay Hian</p>
+      <p>Member of Indonesia Stock Exchange</p>
+      <p style="margin-top: 10px;">© 2025 UTRADE. All rights reserved.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Extract token from URL path
+  const token = window.location.pathname.split('/').pop();
+
+  // API endpoint (relative URL - same server)
+  const API_URL = '/api/auth/totp/setup/' + token;
+
+  /**
+   * Load TOTP setup data from API
+   */
+  async function loadSetupData() {
+      try {
+          console.log('Loading TOTP setup data for token:', token);
+
+          const response = await fetch(API_URL);
+
+          if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.message || 'Failed to load setup data');
+          }
+
+          const data = await response.json();
+          console.log('TOTP data loaded successfully');
+
+          displaySetupData(data);
+
+      } catch (error) {
+          console.error('Error loading TOTP data:', error);
+          showError(error.message);
+      }
+  }
+
+  /**
+   * Display TOTP setup data on the page
+   */
+  function displaySetupData(data) {
+      // Hide loading, show success
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+
+      // Display QR Code
+      const qrCodeImage = document.getElementById('qrCodeImage');
+      qrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.qrCodeUri)}`;
+      qrCodeImage.onerror = function() {
+          console.error('Failed to load QR code image');
+          this.alt = 'QR Code failed to load. Please use the secret key for manual setup.';
+          this.style.display = 'none';
+          const errorMsg = document.createElement('p');
+          errorMsg.textContent = '⚠️ QR Code image failed to load. Please use the manual setup key below.';
+          errorMsg.style.color = '#dc3545';
+          errorMsg.style.fontWeight = 'bold';
+          this.parentElement.appendChild(errorMsg);
+      };
+
+      // Display Secret Key
+      document.getElementById('secretKey').textContent = data.secret;
+
+      // Display Backup Codes
+      const backupCodesContainer = document.getElementById('backupCodes');
+      backupCodesContainer.innerHTML = ''; // Clear existing
+
+      if (data.backupCodes && data.backupCodes.length > 0) {
+          data.backupCodes.forEach(code => {
+              const codeElement = document.createElement('div');
+              codeElement.className = 'backup-code';
+              codeElement.textContent = code;
+              backupCodesContainer.appendChild(codeElement);
+          });
+      } else {
+          backupCodesContainer.innerHTML = '<p style="color: #dc3545; text-align: center; padding: 20px;">No backup codes available</p>';
+      }
+
+      console.log('TOTP setup data displayed successfully');
+  }
+
+  /**
+   * Show error message
+   */
+  function showError(message) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display = 'block';
+
+      const errorMessageElement = document.getElementById('errorMessage');
+
+      // Provide user-friendly error messages
+      if (message.includes('expired') || message.includes('used')) {
+          errorMessageElement.textContent = 'This setup link has expired or has already been used. Please request a new TOTP setup.';
+      } else if (message.includes('Invalid token')) {
+          errorMessageElement.textContent = 'Invalid setup link. Please check your email and try again.';
+      } else if (message.includes('Failed to fetch') || message.includes('Network')) {
+          errorMessageElement.textContent = 'Network error. Please check your internet connection and try again.';
+      } else {
+          errorMessageElement.textContent = message || 'An error occurred while loading the setup data. Please try again.';
+      }
+  }
+
+  /**
+   * Validate token format before loading
+   */
+  function isValidToken(token) {
+      // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(token);
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log('TOTP Setup Page loaded');
+      console.log('Token:', token);
+      console.log('API URL:', API_URL);
+
+      // Validate token format
+      if (!token || token === 'totp-setup.html') {
+          showError('No token provided in the URL. Please use the link from your email.');
+          return;
+      }
+
+      if (!isValidToken(token)) {
+          showError('Invalid token format. Please check the link from your email.');
+          return;
+      }
+
+      // Load data
+      loadSetupData();
+  });
+</script>
+</body>
+</html>
